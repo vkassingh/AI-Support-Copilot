@@ -1,0 +1,34 @@
+In memorey db is used.
+first we created the api to create tickets, get tickets, get ticket response
+Then tested it on postman
+
+Interview ques
+Rest api design 
+1.POST   /tickets, GET  /tickets, /tickets/:
+2.HTTP status codes : 200 status ok, 201 for new resource creation, 404 resource not found,
+500 server error.
+3. Request params vs request body
+
+Gen AI concepts
+Prompt Engineering — model ko context dena (role, input, expected output)
+System Prompt vs User Prompt — tumhara prompt ek system prompt tha jo agent ka role define karta tha
+LLM as a Service — Gemini API ko directly call kiya, model locally nahi chala
+
+Postman
+  │
+  │  POST /tickets/1/draft-reply
+  ▼
+Express Server (localhost:3000)
+  │
+  │  ticket find karo
+  │  prompt banao
+  ▼
+Gemini API (Google Servers)
+  │
+  │  AI generated text
+  ▼
+Express Server
+  │
+  │  res.json()
+  ▼
+Postman ← Response mil gayi
