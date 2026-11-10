@@ -9,30 +9,35 @@ export default function LoginPage({ onDone }: { onDone: () => void }) {
   const [isRegister, setIsRegister] = useState(false);
   const [form, setForm] = useState({ email: "", password: "", role: "customer" });
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-
-    if (isRegister) {
-      const res = await fetch(`${API}/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      const data = await res.json();
-      if (!res.ok) { setError(data.error); setLoading(false); return; }
-      setIsRegister(false);
+    setSuccess("");
+    try {
+      if (isRegister) {
+        const res = await fetch(`${API}/auth/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        });
+        const data = await res.json();
+        if (!res.ok) { setError(data.error); return; }
+        setSuccess("Account created! Please sign in.");
+        setIsRegister(false);
+        return;
+      }
+      const err = await login(form.email, form.password);
+      if (err) setError(err);
+      else onDone();
+    } catch {
+      setError("Network error — please try again.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const err = await login(form.email, form.password);
-    if (err) setError(err);
-    else onDone();
-    setLoading(false);
   };
 
   return (
@@ -88,6 +93,12 @@ export default function LoginPage({ onDone }: { onDone: () => void }) {
               </div>
             )}
 
+            {success && (
+              <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+                <p className="text-emerald-600 text-xs">{success}</p>
+              </div>
+            )}
+
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2">
                 <p className="text-red-600 text-xs">{error}</p>
@@ -107,7 +118,7 @@ export default function LoginPage({ onDone }: { onDone: () => void }) {
             {isRegister ? "Already have an account?" : "Don't have an account?"}{" "}
             <button
               className="text-violet-600 font-medium hover:text-violet-700"
-              onClick={() => { setIsRegister(!isRegister); setError(""); }}
+              onClick={() => { setIsRegister(!isRegister); setError(""); setSuccess(""); }}
             >
               {isRegister ? "Sign In" : "Register"}
             </button>
