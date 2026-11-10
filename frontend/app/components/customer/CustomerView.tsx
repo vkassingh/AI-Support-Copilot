@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 
-const API = "http://localhost:3000";
+import API from "../../lib/api";
 
 type Ticket = {
   _id: string;

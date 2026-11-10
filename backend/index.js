@@ -1,13 +1,14 @@
 require("dotenv").config();
-const fetch = require("node-fetch");
-globalThis.fetch = fetch;
 
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./db");
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: ["http://localhost:3001", process.env.FRONTEND_URL || ""],
+  credentials: true,
+}));
 app.use(express.json());
 
 connectDB();
