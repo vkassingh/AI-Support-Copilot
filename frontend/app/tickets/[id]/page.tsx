@@ -1,8 +1,7 @@
 "use client";
 import { useEffect, useState, Suspense } from "react";
 import { useParams, useRouter } from "next/navigation";
-
-const API = "http://localhost:3000";
+import API from "../../lib/api";
 
 type Ticket = {
   id: number;

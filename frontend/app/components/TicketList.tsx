@@ -1,6 +1,6 @@
 "use client";
 
-const API = "http://localhost:3000";
+import API from "../lib/api";
 
 export type Ticket = {
   id: number;

@@ -1,8 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Ticket } from "./TicketList";
-
-const API = "http://localhost:3000";
+import API from "../lib/api";
 
 type Props = {
   ticket: Ticket;
