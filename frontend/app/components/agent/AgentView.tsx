@@ -17,9 +17,9 @@ type Ticket = {
 };
 
 const statusStyles: Record<string, string> = {
-  open: "bg-blue-100 text-blue-700",
-  pending: "bg-yellow-100 text-yellow-700",
-  resolved: "bg-green-100 text-green-700",
+  open: "bg-amber-100 text-amber-800",
+  pending: "bg-violet-100 text-violet-800",
+  resolved: "bg-emerald-100 text-emerald-800",
 };
 
 export default function AgentView() {
@@ -34,8 +34,7 @@ export default function AgentView() {
 
   const fetchTickets = async () => {
     const res = await fetch(`${API}/tickets`, { headers });
-    const data = await res.json();
-    setTickets(data);
+    setTickets(await res.json());
   };
 
   useEffect(() => { fetchTickets(); }, []);
@@ -70,141 +69,206 @@ export default function AgentView() {
   };
 
   return (
-    <div className="flex h-screen bg-white">
+    <div className="flex h-screen bg-slate-50">
+
       {/* Sidebar */}
-      <aside className="w-72 border-r bg-gray-50 flex flex-col">
-        <div className="p-4 border-b flex items-center justify-between">
-          <div>
-            <p className="font-semibold text-sm">🛠 {user?.email}</p>
-            <p className="text-xs text-gray-400">Agent</p>
+      <aside className="w-72 border-r border-slate-200/80 bg-white flex flex-col">
+
+        {/* Header */}
+        <div className="p-4 border-b border-slate-100">
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">
+                {user?.email?.[0]?.toUpperCase()}
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-800 truncate max-w-[140px]">{user?.email}</p>
+                <p className="text-[10px] text-violet-600 font-medium">Agent</p>
+              </div>
+            </div>
+            <button onClick={logout} className="text-xs text-slate-400 hover:text-slate-700 transition">Logout</button>
           </div>
-          <button onClick={logout} className="text-xs text-gray-400 hover:text-black">Logout</button>
         </div>
 
-        <div className="p-3 border-b">
-          <p className="text-xs text-gray-500 font-medium">All Tickets ({tickets.length})</p>
+        {/* Ticket count */}
+        <div className="px-4 py-3 border-b border-slate-100">
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+            All Tickets
+            <span className="ml-2 bg-violet-100 text-violet-700 px-1.5 py-0.5 rounded-full text-[10px]">{tickets.length}</span>
+          </p>
         </div>
 
+        {/* List */}
         <div className="flex-1 overflow-y-auto">
+          {tickets.length === 0 && (
+            <p className="text-xs text-slate-400 text-center mt-10">No tickets yet.</p>
+          )}
           {tickets.map((t) => (
             <div
               key={t._id}
               onClick={() => selectTicket(t)}
-              className={`p-3 border-b cursor-pointer hover:bg-white transition-colors ${selected?._id === t._id ? "bg-white border-l-2 border-l-black" : ""}`}
+              className={`p-3 border-b border-slate-100 cursor-pointer transition-colors ${
+                selected?._id === t._id
+                  ? "bg-violet-50 border-l-2 border-l-violet-500"
+                  : "hover:bg-violet-50/50"
+              }`}
             >
               <div className="flex justify-between items-start gap-1 mb-1">
-                <p className="text-sm font-medium truncate">{t.title}</p>
+                <p className="text-sm font-medium text-slate-800 truncate">{t.title}</p>
                 <span className={`text-[10px] px-1.5 py-0.5 rounded-full whitespace-nowrap font-medium ${statusStyles[t.status]}`}>
                   {t.status}
                 </span>
               </div>
-              <p className="text-xs text-gray-500">{t.customerId?.email}</p>
-              <p className="text-xs text-gray-400 truncate">{t.description}</p>
+              <p className="text-xs text-slate-500">{t.customerId?.email}</p>
+              <p className="text-xs text-slate-400 truncate mt-0.5">{t.description}</p>
             </div>
           ))}
         </div>
       </aside>
 
-      {/* Agent Workspace */}
+      {/* Workspace */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {!selected ? (
-          <div className="flex items-center justify-center h-full text-gray-400 text-sm">
-            Select a ticket to start working
+          <div className="flex flex-col items-center justify-center h-full gap-3 text-slate-400">
+            <div className="w-12 h-12 rounded-2xl bg-violet-50 flex items-center justify-center text-2xl">✦</div>
+            <p className="text-sm">Select a ticket to start working</p>
           </div>
         ) : (
           <>
             {/* Top bar */}
-            <div className="p-4 border-b flex items-center justify-between bg-white">
+            <div className="px-6 py-4 border-b border-slate-200/80 bg-white flex items-center justify-between">
               <div>
-                <h2 className="font-semibold">{selected.title}</h2>
-                <p className="text-xs text-gray-400">
+                <h2 className="font-semibold text-slate-900">{selected.title}</h2>
+                <p className="text-xs text-slate-400 mt-0.5">
                   {selected.customerId?.email} · {new Date(selected.createdAt).toLocaleDateString()}
                 </p>
               </div>
-              <span className={`text-xs px-2 py-1 rounded-full font-medium ${statusStyles[selected.status]}`}>
+              <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${statusStyles[selected.status]}`}>
                 {selected.status}
               </span>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-5 space-y-5">
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+
               {/* Customer Message */}
               <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Customer Message</p>
-                <div className="bg-gray-50 border rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-7 h-7 rounded-full bg-gray-300 flex items-center justify-center text-xs font-bold text-white">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Customer Message</p>
+                <div className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-sm">
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center text-xs font-bold text-slate-600">
                       {selected.customerId?.email?.[0]?.toUpperCase()}
                     </div>
-                    <span className="text-sm font-medium">{selected.customerId?.email}</span>
+                    <div>
+                      <p className="text-sm font-medium text-slate-800">{selected.customerId?.email}</p>
+                      <p className="text-[10px] text-slate-400">{new Date(selected.createdAt).toLocaleString()}</p>
+                    </div>
                   </div>
-                  <p className="text-sm text-gray-700">{selected.description}</p>
+                  <p className="text-sm text-slate-600 leading-relaxed">{selected.description}</p>
                 </div>
               </div>
 
               {/* AI Draft Workspace */}
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">AI Draft Reply</p>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest">AI Draft Reply</p>
+                    <span className="text-[10px] bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-2 py-0.5 rounded-full font-medium">
+                      Gemini
+                    </span>
+                  </div>
                   <button
                     onClick={generateDraft}
                     disabled={loadingDraft || selected.status === "resolved"}
-                    className="text-xs bg-black text-white px-3 py-1.5 rounded hover:bg-gray-800 disabled:opacity-40"
+                    className="flex items-center gap-1.5 text-xs bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-3.5 py-1.5 rounded-lg hover:from-violet-700 hover:to-indigo-700 disabled:opacity-40 shadow-sm shadow-violet-200 transition-all"
                   >
-                    {loadingDraft ? "✨ Generating..." : "✨ Generate Draft"}
+                    {loadingDraft ? (
+                      <><span className="animate-spin">✦</span> Generating...</>
+                    ) : (
+                      <>✦ Generate Draft</>
+                    )}
                   </button>
                 </div>
 
+                {/* Empty state */}
                 {!draftReply && !loadingDraft && (
-                  <div className="border border-dashed rounded-lg p-6 text-center text-gray-400 text-sm">
-                    Click "Generate Draft" to get an AI-powered reply
+                  <div className="bg-gradient-to-b from-violet-50/40 to-white border border-violet-100 border-dashed rounded-xl p-8 text-center">
+                    <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center text-violet-500 text-lg mx-auto mb-3">✦</div>
+                    <p className="text-sm text-slate-500">Click <span className="text-violet-600 font-medium">Generate Draft</span> to get an AI-powered reply</p>
                   </div>
                 )}
 
+                {/* Loading */}
                 {loadingDraft && (
-                  <div className="border rounded-lg p-4 text-sm text-gray-400 animate-pulse">
-                    Gemini is writing a reply...
+                  <div className="bg-gradient-to-b from-violet-50/40 to-white border border-violet-100 rounded-xl p-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center animate-pulse">
+                        <span className="text-white text-sm">✦</span>
+                      </div>
+                      <div className="space-y-1.5 flex-1">
+                        <div className="h-2.5 bg-violet-100 rounded-full animate-pulse w-3/4" />
+                        <div className="h-2.5 bg-violet-100 rounded-full animate-pulse w-1/2" />
+                      </div>
+                    </div>
+                    <p className="text-xs text-violet-500 mt-3 text-center">Gemini is crafting a reply...</p>
                   </div>
                 )}
 
+                {/* Draft content */}
                 {draftReply && !loadingDraft && (
-                  <div className="border rounded-lg p-4 space-y-3">
-                    {isEditing ? (
-                      <textarea
-                        className="w-full border rounded px-3 py-2 text-sm min-h-[140px] focus:outline-none focus:ring-1 focus:ring-black"
-                        value={draftReply}
-                        onChange={(e) => setDraftReply(e.target.value)}
-                      />
-                    ) : (
-                      <p className="text-sm text-gray-700 whitespace-pre-wrap">{draftReply}</p>
-                    )}
+                  <div className="bg-gradient-to-b from-violet-50/40 to-white border border-violet-200 rounded-xl overflow-hidden shadow-sm">
+                    {/* AI badge header */}
+                    <div className="px-4 py-2.5 border-b border-violet-100 flex items-center gap-2 bg-violet-50/60">
+                      <span className="w-4 h-4 rounded bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white text-[9px]">✦</span>
+                      <span className="text-xs font-medium text-violet-700">AI Generated Draft</span>
+                    </div>
 
-                    {selected.status === "resolved" ? (
-                      <p className="text-green-600 text-sm font-medium">✅ Reply Approved & Sent</p>
-                    ) : (
-                      <div className="flex gap-2 flex-wrap">
-                        <button
-                          onClick={handleApprove}
-                          className="bg-green-600 text-white px-4 py-1.5 rounded text-sm hover:bg-green-700"
-                        >
-                          ✅ Approve & Send
-                        </button>
-                        {isEditing ? (
+                    <div className="p-4 space-y-4">
+                      {isEditing ? (
+                        <textarea
+                          className="w-full border border-violet-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 min-h-[140px] focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent bg-white transition"
+                          value={draftReply}
+                          onChange={(e) => setDraftReply(e.target.value)}
+                        />
+                      ) : (
+                        <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{draftReply}</p>
+                      )}
+
+                      {selected.status === "resolved" ? (
+                        <div className="flex items-center gap-2 text-emerald-600 text-sm font-medium bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+                          <span>✓</span> Reply Approved & Sent
+                        </div>
+                      ) : (
+                        <div className="flex gap-2 flex-wrap pt-1">
                           <button
-                            onClick={() => setIsEditing(false)}
-                            className="border px-4 py-1.5 rounded text-sm hover:bg-gray-50"
+                            onClick={handleApprove}
+                            className="flex items-center gap-1.5 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm shadow-violet-200 transition-all"
                           >
-                            Done
+                            ✓ Approve & Send
                           </button>
-                        ) : (
+                          {isEditing ? (
+                            <button
+                              onClick={() => setIsEditing(false)}
+                              className="px-4 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-100 transition"
+                            >
+                              Done
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => setIsEditing(true)}
+                              className="flex items-center gap-1.5 border border-violet-200 text-violet-700 hover:bg-violet-50 px-4 py-2 rounded-lg text-sm font-medium transition"
+                            >
+                              ✏️ Edit Reply
+                            </button>
+                          )}
                           <button
-                            onClick={() => setIsEditing(true)}
-                            className="border px-4 py-1.5 rounded text-sm hover:bg-gray-50"
+                            onClick={generateDraft}
+                            className="px-4 py-2 rounded-lg text-sm text-slate-500 hover:bg-slate-100 transition"
                           >
-                            ✏️ Edit Reply
+                            ↺ Regenerate
                           </button>
-                        )}
-                      </div>
-                    )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
