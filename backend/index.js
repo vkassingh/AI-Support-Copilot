@@ -1,4 +1,6 @@
 require("dotenv").config();
+const fetch = require("node-fetch");
+globalThis.fetch = fetch;
 const express = require("express");
 const cors = require("cors");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
@@ -49,7 +51,7 @@ Issue Description: ${ticket.description}
 Write a concise reply addressing their issue.`;
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash-lite" });
     const result = await model.generateContent(prompt);
     res.json({ ticketId: ticket.id, draftReply: result.response.text() });
   } catch (err) {
